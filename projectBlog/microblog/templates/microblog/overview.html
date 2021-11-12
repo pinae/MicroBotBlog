@@ -1,0 +1,23 @@
+{% load static %}
+<html lang="de">
+<head>
+    <title>Projektübersicht</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&family=Source+Code+Pro&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'microblog/styles.css' %}" />
+</head>
+<body>
+<div class="content">
+    <h1 class="projectHeading">Projektübersicht</h1>
+    <div class="post">
+        <ul>
+            {% for project in projects %}
+            <li><a href="{{ project.url }}">{{ project.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+</body>
+</html>

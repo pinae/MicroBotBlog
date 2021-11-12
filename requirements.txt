@@ -1,2 +1,4 @@
 Django
 django-markdownify
+Pillow
+python-telegram-bot

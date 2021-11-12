@@ -1,0 +1,19 @@
+<html lang="de">
+<head>
+    <title>Fehler: Projekt „{{ project_name }}“ existiert nicht</title>
+</head>
+<body>
+    <h1>Fehler!</h1>
+    <p>Sie haben versucht ein Projekt mit dem Namen „{{ project_name }}“ aufzurufen.
+       Ein solches existiert aber leider nicht.</p>
+    {% if existing_projects %}
+    <h2>Vorschlag:</h2>
+    <ul>
+        <p>Versuchen Sie es doch stattdessen mit einem dieser Projekte:</p>
+        {% for project in existing_projects %}
+        <li><a href="{{ project.url }}">{{ project.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>

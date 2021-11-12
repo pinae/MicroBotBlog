@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import BlogProject, BlogPost, BlogImage
 
-# Register your models here.
+admin.site.register(BlogProject)
+admin.site.register(BlogPost)
+admin.site.register(BlogImage)
