@@ -20,10 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-kpp%ga$)gsiu^(kyx_4f!e@i7t=$8megi#p^0+*90*_x+ihthf'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-kpp%ga$)gsiu^(kyx_4f!e@i7t=$8megi#p^0+*90*_x+ihthf')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG_MODE', 'True') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -77,10 +77,22 @@ WSGI_APPLICATION = 'projectBlog.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DJANGO_DB_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.getenv('DB_NAME', os.path.join(BASE_DIR, 'db.sqlite3')),
     }
 }
+e = os.getenv('DB_USER')
+if e:
+    DATABASES['default']['USER'] = e
+e = os.getenv('DB_PASSWORD')
+if e:
+    DATABASES['default']['PASSWORD'] = e
+e = os.getenv('DB_HOST')
+if e:
+    DATABASES['default']['HOST'] = e
+e = os.getenv('DB_PORT')
+if e:
+    DATABASES['default']['PORT'] = e
 
 
 # Password validation
@@ -105,9 +117,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
-LANGUAGE_CODE = 'de-de'
+LANGUAGE_CODE = os.getenv('NUTRIA_LANGUAGE_CODE', 'de-de')
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.getenv('NUTRIA_TIME_ZONE', 'Europe/Berlin')
 
 USE_I18N = True
 
