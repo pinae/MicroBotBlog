@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'microblog.apps.MicroblogConfig',
     'markdownify.apps.MarkdownifyConfig',
+    'telegramBot.apps.TelegrambotConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -117,9 +118,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
 
-LANGUAGE_CODE = os.getenv('NUTRIA_LANGUAGE_CODE', 'de-de')
+LANGUAGE_CODE = os.getenv('DJANGO_LANGUAGE_CODE', 'de-de')
 
-TIME_ZONE = os.getenv('NUTRIA_TIME_ZONE', 'Europe/Berlin')
+TIME_ZONE = os.getenv('DJANGO_TIME_ZONE', 'Europe/Berlin')
 
 USE_I18N = True
 
@@ -181,4 +182,12 @@ MARKDOWNIFY = {
         ],
         "STRIP": False
     }
+}
+
+# Telegram Bot
+
+TELEGRAM_BOT = {
+    "name": os.getenv('TELEGRAMBOT_NAME', 'ChangeToYourBotName'),
+    "username": os.getenv('TELEGRAMBOT_USERNAME', 'usernameEndingWithBot'),
+    "token": os.getenv('TELEGRAMBOT_TOKEN', '1234567890:ABCDEFfakeToken123456789GHIJKLMNOPQ'),
 }
