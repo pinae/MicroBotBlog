@@ -193,4 +193,5 @@ TELEGRAM_BOT = {
     "name": os.getenv('TELEGRAMBOT_NAME', 'ChangeToYourBotName'),
     "username": os.getenv('TELEGRAMBOT_USERNAME', 'usernameEndingWithBot'),
     "token": os.getenv('TELEGRAMBOT_TOKEN', '1234567890:ABCDEFfakeToken123456789GHIJKLMNOPQ'),
+    "register_webhook": os.getenv('TELEGRAMBOT_REGISTERWEBHOOK', False),
 }

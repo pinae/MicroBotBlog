@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.conf import settings
+from django.urls import reverse
 from telegram import Bot
 from telegram.ext import Dispatcher
 from telegram.ext import MessageHandler, Filters
@@ -22,3 +23,5 @@ class TelegrambotConfig(AppConfig):
                 MessageHandler(Filters.text & (~Filters.command), message))
             self.dispatcher.add_handler(
                 MessageHandler(filters=Filters.photo, callback=image))
+        if settings.TELEGRAM_BOT["register_webhook"]:
+            self.bot.setWebhook(reverse('webhook'))
