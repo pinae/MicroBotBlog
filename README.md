@@ -157,7 +157,7 @@ cd pinasprojects
 git pull
 cd ..
 docker-compose build pinasprojects
-docker compose up -d pinasprojects pinasprojects_maria pinasprojects_nginx
+docker-compose up -d pinasprojects pinasprojects_maria pinasprojects_nginx
 ```
 
 If there are errors concerning insufficient rights to write to the folder `pinasprojects/maria` change the ownership to your user while leaving the group untouched. The user IDs in the container and in the host system may differ and the files need to be writable for both user IDs.
