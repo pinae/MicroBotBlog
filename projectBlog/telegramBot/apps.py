@@ -24,4 +24,4 @@ class TelegrambotConfig(AppConfig):
             self.dispatcher.add_handler(
                 MessageHandler(filters=Filters.photo, callback=image))
         if settings.TELEGRAM_BOT["register_webhook"]:
-            self.bot.setWebhook(reverse('webhook'))
+            self.bot.setWebhook(settings.TELEGRAM_BOT["webhook_base_url"] + reverse('webhook'))

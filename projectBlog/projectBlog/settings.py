@@ -194,4 +194,5 @@ TELEGRAM_BOT = {
     "username": os.getenv('TELEGRAMBOT_USERNAME', 'usernameEndingWithBot'),
     "token": os.getenv('TELEGRAMBOT_TOKEN', '1234567890:ABCDEFfakeToken123456789GHIJKLMNOPQ'),
     "register_webhook": os.getenv('TELEGRAMBOT_REGISTERWEBHOOK', False),
+    "webhook_base_url": os.getenv('TELEGRAMBOT_WEBHOOK_BASE_URL', "https://microbotblog.example.com"),
 }
