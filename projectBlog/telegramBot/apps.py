@@ -4,6 +4,7 @@ from django.urls import reverse
 from telegram import Bot
 from telegram.ext import Dispatcher
 from telegram.ext import MessageHandler, Filters
+from telegram.error import RetryAfter
 from queue import Queue
 from .bot import message, image
 
@@ -25,5 +26,11 @@ class TelegrambotConfig(AppConfig):
             self.dispatcher.add_handler(
                 MessageHandler(filters=Filters.photo, callback=image))
         if settings.TELEGRAM_BOT["register_webhook"] and not self.webhook_registered:
-            self.bot.setWebhook(settings.TELEGRAM_BOT["webhook_base_url"] + reverse('webhook'))
+            try:
+                self.bot.setWebhook(settings.TELEGRAM_BOT["webhook_base_url"] + reverse('webhook'))
+            except RetryAfter:
+                print("Telegram didn't accept the setWebhook command. " +
+                      "This is probably because there was another request to the API within one second.")
+                print("This is what the bot already knows about the webhook:")
+                print(self.bot.get_webhook_info())
             self.webhook_registered = True
