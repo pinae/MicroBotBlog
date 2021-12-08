@@ -1,14 +1,15 @@
-FROM debian
+FROM debian:bullseye
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update && \
     apt-get upgrade -y && \
+    apt-get install -y apt-utils && \
     apt-get install -y \
 	python3 \
 	python3-dev \
 	python3-setuptools \
 	python3-pip \
-	libmariadbclient-dev && \
+	libmariadbclient-dev-compat && \
 	pip3 install uwsgi mysqlclient && \
     rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /home/docker/requirements.txt
