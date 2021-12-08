@@ -13,6 +13,7 @@ class TelegrambotConfig(AppConfig):
     name = 'telegramBot'
     bot: Bot = None
     dispatcher: Dispatcher = None
+    webhook_registered = False
 
     def ready(self):
         if not self.bot:
@@ -23,5 +24,6 @@ class TelegrambotConfig(AppConfig):
                 MessageHandler(Filters.text & (~Filters.command), message))
             self.dispatcher.add_handler(
                 MessageHandler(filters=Filters.photo, callback=image))
-        if settings.TELEGRAM_BOT["register_webhook"]:
+        if settings.TELEGRAM_BOT["register_webhook"] and not self.webhook_registered:
             self.bot.setWebhook(settings.TELEGRAM_BOT["webhook_base_url"] + reverse('webhook'))
+            self.webhook_registered = True
