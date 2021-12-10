@@ -1,16 +1,34 @@
+from typing import Any
 from telegram import Update
 from telegram.ext import CallbackContext
+from django.conf import settings
+from django.urls import reverse
+from requests import post
 
 
-def message(update: Update, context: CallbackContext):
-    if update.edited_message is not None:
-        print("Edited ID:", update.edited_message.message_id)
+class UpdateWithToken(Update):
+    csrf_token = None
+
+
+def message(update: UpdateWithToken, context: CallbackContext):
+    telegram_id = None
     if update.message is not None:
-        print("New ID:", update.message.message_id)
-    print(update.effective_message.text_markdown)
-    print("Chat Titel:", update.effective_chat['title'])
-    print(update.effective_user)
-    # context.bot.send_message(chat_id=update.effective_chat.id, text=str(update))
+        telegram_id = update.message.message_id
+    if update.edited_message is not None:
+        telegram_id = update.edited_message.message_id
+    post(settings.TELEGRAM_BOT["webhook_base_url"] + reverse("create_post"), headers={
+        "X-CSRFToken": update.csrf_token
+    }, cookies={
+        "csrftoken": update.csrf_token
+    }, json={
+        "author_info": {
+            "first_name": update.effective_user["first_name"],
+            "last_name": update.effective_user["last_name"]
+        },
+        "project_name": update.effective_chat["title"],
+        "text": update.effective_message.text_markdown,
+        "telegram_id": telegram_id
+    })
 
 
 def image(update: Update, context: CallbackContext):

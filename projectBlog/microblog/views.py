@@ -1,8 +1,11 @@
 from django.shortcuts import render
+from django.http import HttpResponseBadRequest, HttpResponse
 from django.urls import reverse
 from urllib.parse import quote_plus, unquote_plus
 from django.db.models import Max
-from .models import BlogProject
+from .models import BlogProject, BlogPost, BlogImage
+from django.contrib.auth.models import User
+from json import loads
 
 
 def project_overview(request):
@@ -37,3 +40,42 @@ def project_timeline(request, project_name):
             "text": post.text
         } for post in posts]
     })
+
+
+def create_post(request):
+    data = loads(request.body)
+    if "author_info" not in data:
+        return HttpResponseBadRequest("Error: \"author_info\" is missing.")
+    author_info = data["author_info"]
+    if "first_name" not in author_info or "last_name" not in author_info:
+        return HttpResponseBadRequest("Error: \"author_info\" is incomplete. " +
+                                      "It must have a \"first_name\" and a \"last_name\".")
+    if "project_name" not in data:
+        return HttpResponseBadRequest("Error: \"project_name\" is missing.")
+    project_name = data["project_name"]
+    if "text" not in data:
+        return HttpResponseBadRequest("Error: \"text\" is missing.")
+    text = data["text"]
+    try:
+        project = BlogProject.objects.get(name=project_name)
+    except BlogProject.DoesNotExist:
+        return HttpResponseBadRequest("There is not BlogProject with the name \"{}\".".format(project_name))
+    try:
+        user = User.objects.get(first_name=author_info["first_name"], last_name=author_info["last_name"])
+    except User.DoesNotExist:
+        return HttpResponseBadRequest("There is no User {} {}.".format(
+            author_info["first_name"], author_info["last_name"]))
+    telegram_id = None
+    if "telegram_id" in data:
+        telegram_id = data["telegram_id"]
+        try:
+            post = BlogPost.objects.get(project=project, author=user, telegram_id=telegram_id)
+            post.project = project
+            post.author = user
+            post.text = text
+        except BlogPost.DoesNotExist:
+            post = BlogPost(project=project, author=user, text=text, telegram_id=telegram_id)
+    else:
+        post = BlogPost(project=project, author=user, text=text, telegram_id=telegram_id)
+    post.save()
+    return HttpResponse("OK")
