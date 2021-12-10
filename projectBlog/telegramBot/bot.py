@@ -16,7 +16,7 @@ def message(update: UpdateWithToken, context: CallbackContext):
         telegram_id = update.message.message_id
     if update.edited_message is not None:
         telegram_id = update.edited_message.message_id
-    response = post(settings.TELEGRAM_BOT["webhook_base_url"] + reverse("create_post"), headers={
+    response = post(settings.DOMAIN + reverse("create_post"), headers={
         "X-CSRFToken": update.csrf_token
     }, cookies={
         "csrftoken": update.csrf_token

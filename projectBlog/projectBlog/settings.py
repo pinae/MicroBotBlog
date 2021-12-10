@@ -19,6 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
 
+DOMAIN = os.getenv('DOMAIN', 'http://127.0.0.1:8000')
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-kpp%ga$)gsiu^(kyx_4f!e@i7t=$8megi#p^0+*90*_x+ihthf')
 
@@ -72,6 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'projectBlog.wsgi.application'
 
+CSRF_TRUSTED_ORIGINS = [DOMAIN]
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
@@ -194,5 +197,4 @@ TELEGRAM_BOT = {
     "username": os.getenv('TELEGRAMBOT_USERNAME', 'usernameEndingWithBot'),
     "token": os.getenv('TELEGRAMBOT_TOKEN', '1234567890:ABCDEFfakeToken123456789GHIJKLMNOPQ'),
     "register_webhook": os.getenv('TELEGRAMBOT_REGISTERWEBHOOK', False),
-    "webhook_base_url": os.getenv('TELEGRAMBOT_WEBHOOK_BASE_URL', "http://127.0.0.1:8000"),
 }

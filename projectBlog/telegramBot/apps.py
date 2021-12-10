@@ -27,7 +27,7 @@ class TelegrambotConfig(AppConfig):
                 MessageHandler(filters=Filters.photo, callback=image))
         if settings.TELEGRAM_BOT["register_webhook"] and not self.webhook_registered:
             try:
-                self.bot.setWebhook(settings.TELEGRAM_BOT["webhook_base_url"] + reverse('webhook'))
+                self.bot.setWebhook(settings.DOMAIN + reverse('webhook'))
             except RetryAfter:
                 print("Telegram didn't accept the setWebhook command. " +
                       "This is probably because there was another request to the API within one second.")
