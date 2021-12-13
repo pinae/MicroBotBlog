@@ -1,11 +1,18 @@
 from django.shortcuts import render
 from django.http import HttpResponseBadRequest, HttpResponse
 from django.urls import reverse
+from django.conf import settings
 from urllib.parse import quote_plus, unquote_plus
 from django.db.models import Max
 from .models import BlogProject, BlogPost, BlogImage
 from django.contrib.auth.models import User
 from json import loads
+from requests import get
+from PIL import Image
+
+
+class BadRequestException(Exception):
+    pass
 
 
 def project_overview(request):
@@ -42,40 +49,89 @@ def project_timeline(request, project_name):
     })
 
 
-def create_post(request):
-    data = loads(request.body)
+def get_author(data):
     if "author_info" not in data:
-        return HttpResponseBadRequest("Error: \"author_info\" is missing.")
+        raise BadRequestException("Error: \"author_info\" is missing.")
     author_info = data["author_info"]
     if "first_name" not in author_info or "last_name" not in author_info:
-        return HttpResponseBadRequest("Error: \"author_info\" is incomplete. " +
-                                      "It must have a \"first_name\" and a \"last_name\".")
-    if "project_name" not in data:
-        return HttpResponseBadRequest("Error: \"project_name\" is missing.")
-    project_name = data["project_name"]
-    if "text" not in data:
-        return HttpResponseBadRequest("Error: \"text\" is missing.")
-    text = data["text"]
-    try:
-        project = BlogProject.objects.get(name=project_name)
-    except BlogProject.DoesNotExist:
-        return HttpResponseBadRequest("There is not BlogProject with the name \"{}\".".format(project_name))
+        raise BadRequestException("Error: \"author_info\" is incomplete. " +
+                        "It must have a \"first_name\" and a \"last_name\".")
     try:
         user = User.objects.get(first_name=author_info["first_name"], last_name=author_info["last_name"])
     except User.DoesNotExist:
-        return HttpResponseBadRequest("There is no User {} {}.".format(
+        raise BadRequestException("There is no User {} {}.".format(
             author_info["first_name"], author_info["last_name"]))
+    return user
+
+
+def get_project(data):
+    if "project_name" not in data:
+        raise BadRequestException("Error: \"project_name\" is missing.")
+    project_name = data["project_name"]
+    try:
+        project = BlogProject.objects.get(name=project_name)
+    except BlogProject.DoesNotExist:
+        raise BadRequestException("There is not BlogProject with the name \"{}\".".format(project_name))
+    return project
+
+
+def get_or_make_post(data, project, author):
     telegram_id = None
     if "telegram_id" in data:
         telegram_id = data["telegram_id"]
         try:
-            post = BlogPost.objects.get(project=project, author=user, telegram_id=telegram_id)
-            post.project = project
-            post.author = user
-            post.text = text
+            post = BlogPost.objects.get(project=project, author=author, telegram_id=telegram_id)
         except BlogPost.DoesNotExist:
-            post = BlogPost(project=project, author=user, text=text, telegram_id=telegram_id)
+            post = BlogPost(project=project, author=author, telegram_id=telegram_id)
     else:
-        post = BlogPost(project=project, author=user, text=text, telegram_id=telegram_id)
+        post = BlogPost(project=project, author=author, telegram_id=telegram_id)
+    return post
+
+
+def create_post(request):
+    data = loads(request.body)
+    try:
+        user = get_author(data)
+    except BadRequestException as e:
+        return HttpResponseBadRequest(str(e))
+    try:
+        project = get_project(data)
+    except BadRequestException as e:
+        return HttpResponseBadRequest(str(e))
+    if "text" not in data:
+        return HttpResponseBadRequest("Error: \"text\" is missing.")
+    text = data["text"]
+    post = get_or_make_post(data, project, author=user)
+    post.text = text
     post.save()
     return HttpResponse("OK")
+
+
+def download_image(request):
+    data = loads(request.body)
+    try:
+        user = get_author(data)
+    except BadRequestException as e:
+        return HttpResponseBadRequest(str(e))
+    try:
+        project = get_project(data)
+    except BadRequestException as e:
+        return HttpResponseBadRequest(str(e))
+    post = get_or_make_post(data, project, author=user)
+    if "caption" not in data:
+        return HttpResponseBadRequest("Error: \"caption\" is missing.")
+    post.text = data["caption"]
+    post.save()
+    for i, image_url in enumerate(data['album']):
+        img_stream = get(data['url'], stream=True)
+        img_stream.raw.decode_content = True  # unzip automatically if the response is compressed
+        with Image.open(img_stream.raw) as img:
+            blog_image = BlogImage(image=img, post=post)
+            blog_image.save()
+        post.text = "[{}{}]({}{})\n\n{}".format(
+            data["caption"],
+            " - Image No. " + str(i) if len(data['album']) > 1 else "",
+            settings.MEDIA_URL,
+            blog_image.image.url(),
+            post.text)
+    post.save()
