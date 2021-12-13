@@ -62,6 +62,6 @@ def image(update: UpdateWithToken, context: CallbackContext):
         },
         "project_name": update.effective_chat["title"],
         "caption": update.effective_message.caption_markdown,
-        "album": [{"url": file_object['file_path']}],
+        "album": [file_object['file_path']],
         "telegram_id": telegram_id
     }, csrf_token=update.csrf_token)

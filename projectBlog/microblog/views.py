@@ -123,7 +123,7 @@ def download_image(request):
     post.text = data["caption"]
     post.save()
     for i, image_url in enumerate(data['album']):
-        img_stream = get(data['url'], stream=True)
+        img_stream = get(image_url, stream=True)
         img_stream.raw.decode_content = True  # unzip automatically if the response is compressed
         with Image.open(img_stream.raw) as img:
             blog_image = BlogImage(image=img, post=post)
