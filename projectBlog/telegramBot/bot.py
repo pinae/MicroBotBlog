@@ -5,6 +5,7 @@ from django.urls import reverse
 from requests import post
 from ssl import SSLError
 from time import sleep
+from telegram.error import NetworkError
 
 
 class UpdateWithToken(Update):
@@ -30,7 +31,7 @@ def request_save(view_name, data, csrf_token, try_no=1):
         }, json=data)
         if response.text != "OK":
             print(response.text)
-    except SSLError:
+    except SSLError or NetworkError:
         if try_no <= 10:
             sleep(1.5)
             request_save(view_name, data, csrf_token, try_no=try_no+1)
@@ -64,7 +65,7 @@ def image(update: UpdateWithToken, context: CallbackContext):
         try:
             file_object = context.bot.get_file(biggest_photo['object'])
             break
-        except SSLError:
+        except SSLError or NetworkError:
             sleep(1.5)
             if try_no >= 9:
                 print("Tried 10 times to load the file object. Always getting an SSLError. Giving up.")
