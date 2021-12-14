@@ -1,9 +1,10 @@
-from typing import Any
 from telegram import Update
 from telegram.ext import CallbackContext
 from django.conf import settings
 from django.urls import reverse
 from requests import post
+from ssl import SSLError
+from time import sleep
 
 
 class UpdateWithToken(Update):
@@ -19,15 +20,22 @@ def get_telegram_id(update: UpdateWithToken):
     return telegram_id
 
 
-def request_save(view_name, data, csrf_token):
-    response = post(settings.DOMAIN + reverse(view_name), headers={
-        "Connection": "Keep-Alive",
-        "X-CSRFToken": csrf_token
-    }, cookies={
-        "csrftoken": csrf_token
-    }, json=data)
-    if response.text != "OK":
-        print(response.text)
+def request_save(view_name, data, csrf_token, try_no=1):
+    try:
+        response = post(settings.DOMAIN + reverse(view_name), headers={
+            "Connection": "Keep-Alive",
+            "X-CSRFToken": csrf_token
+        }, cookies={
+            "csrftoken": csrf_token
+        }, json=data)
+        if response.text != "OK":
+            print(response.text)
+    except SSLError:
+        if try_no <= 10:
+            sleep(1.5)
+            request_save(view_name, data, csrf_token, try_no=try_no+1)
+        else:
+            print("Tried 10 times. Always getting an SSLError. Giving up.")
 
 
 def message(update: UpdateWithToken, context: CallbackContext):
