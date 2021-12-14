@@ -60,7 +60,15 @@ def image(update: UpdateWithToken, context: CallbackContext):
             biggest_photo['object'] = photo_size
     if biggest_photo['object'] is None:
         return
-    file_object = context.bot.get_file(biggest_photo['object'])
+    for try_no in range(10):
+        try:
+            file_object = context.bot.get_file(biggest_photo['object'])
+            break
+        except SSLError:
+            sleep(1.5)
+            if try_no >= 9:
+                print("Tried 10 times to load the file object. Always getting an SSLError. Giving up.")
+                return
     telegram_id = get_telegram_id(update)
     request_save(view_name="download_image", data={
         "author_info": {
