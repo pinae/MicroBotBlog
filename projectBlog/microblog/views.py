@@ -125,7 +125,7 @@ def download_image(request):
         existing_image.delete()
     if "caption" not in data:
         return HttpResponseBadRequest("Error: \"caption\" is missing.")
-    post.text = data["caption"]
+    post.text = data["caption"] if data["caption"] is not None else ""
     post.save()
     for i, image_url in enumerate(data['album']):
         with NamedTemporaryFile() as tmp_file:
