@@ -21,6 +21,7 @@ def get_telegram_id(update: UpdateWithToken):
 
 def request_save(view_name, data, csrf_token):
     response = post(settings.DOMAIN + reverse(view_name), headers={
+        "Connection": "Keep-Alive",
         "X-CSRFToken": csrf_token
     }, cookies={
         "csrftoken": csrf_token
