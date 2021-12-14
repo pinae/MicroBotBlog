@@ -10,7 +10,8 @@ from json import loads
 from requests import get
 from tempfile import NamedTemporaryFile
 from django.core.files import File
-from PIL import Image
+from time import sleep
+from random import randrange
 
 
 class BadRequestException(Exception):
@@ -125,7 +126,11 @@ def download_image(request):
         existing_image.delete()
     if "caption" not in data:
         return HttpResponseBadRequest("Error: \"caption\" is missing.")
-    post.text = data["caption"] if data["caption"] is not None else ""
+    if data["caption"] is not None:
+        post.text = data["caption"]
+    else:
+        sleep(randrange(100, 1000)/1000)
+        post.text = ""
     post.save()
     for i, image_url in enumerate(data['album']):
         with NamedTemporaryFile() as tmp_file:

@@ -20,7 +20,7 @@ class TelegrambotConfig(AppConfig):
         if not self.bot:
             self.bot = Bot(settings.TELEGRAM_BOT["token"])
         if not self.dispatcher:
-            self.dispatcher = Dispatcher(bot=self.bot, update_queue=Queue(), use_context=True, workers=1)
+            self.dispatcher = Dispatcher(bot=self.bot, update_queue=Queue(), use_context=True)
             self.dispatcher.add_handler(
                 MessageHandler(Filters.text & (~Filters.command), message))
             self.dispatcher.add_handler(
