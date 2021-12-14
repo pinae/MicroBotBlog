@@ -10,8 +10,6 @@ from json import loads
 from requests import get
 from tempfile import NamedTemporaryFile
 from django.core.files import File
-from time import sleep
-from random import randrange
 
 
 class BadRequestException(Exception):
@@ -129,7 +127,6 @@ def download_image(request):
     if data["caption"] is not None:
         post.text = data["caption"]
     else:
-        sleep(randrange(100, 1000)/1000)
         post.text = ""
     post.save()
     for i, image_url in enumerate(data['album']):
