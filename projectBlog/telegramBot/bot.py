@@ -49,11 +49,9 @@ def image(update: UpdateWithToken, context: CallbackContext):
         if photo_size.height > biggest_photo['height']:
             biggest_photo['height'] = photo_size.height
             biggest_photo['object'] = photo_size
-    print(biggest_photo)
     if biggest_photo['object'] is None:
         return
     file_object = context.bot.get_file(biggest_photo['object'])
-    print(file_object)
     telegram_id = get_telegram_id(update)
     request_save(view_name="download_image", data={
         "author_info": {

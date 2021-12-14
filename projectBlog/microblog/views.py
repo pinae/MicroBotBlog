@@ -8,6 +8,8 @@ from .models import BlogProject, BlogPost, BlogImage
 from django.contrib.auth.models import User
 from json import loads
 from requests import get
+from tempfile import NamedTemporaryFile
+from django.core.files import File
 from PIL import Image
 
 
@@ -118,20 +120,28 @@ def download_image(request):
     except BadRequestException as e:
         return HttpResponseBadRequest(str(e))
     post = get_or_make_post(data, project, author=user)
+    existing_images = BlogImage.objects.filter(post=post)
+    for existing_image in existing_images:
+        existing_image.delete()
     if "caption" not in data:
         return HttpResponseBadRequest("Error: \"caption\" is missing.")
     post.text = data["caption"]
     post.save()
     for i, image_url in enumerate(data['album']):
-        img_stream = get(image_url, stream=True)
-        img_stream.raw.decode_content = True  # unzip automatically if the response is compressed
-        with Image.open(img_stream.raw) as img:
-            blog_image = BlogImage(image=img, post=post)
+        with NamedTemporaryFile() as tmp_file:
+            img_response = get(image_url, stream=True)
+            for block in img_response.iter_content(1024 * 8):
+                if not block:
+                    break
+                tmp_file.write(block)
+            file_obj = File(tmp_file, name=image_url.split('/')[-1])
+            blog_image = BlogImage(image=file_obj, post=post)
             blog_image.save()
-        post.text = "[{}{}]({}{})\n\n{}".format(
-            data["caption"],
-            " - Image No. " + str(i) if len(data['album']) > 1 else "",
-            settings.MEDIA_URL,
-            blog_image.image.url(),
-            post.text)
+            post.text = "![{}{}]({}{})\n\n{}".format(
+                data["caption"],
+                " - Image No. " + str(i) if len(data['album']) > 1 else "",
+                settings.DOMAIN,
+                blog_image.image.url,
+                post.text)
     post.save()
+    return HttpResponse("OK")

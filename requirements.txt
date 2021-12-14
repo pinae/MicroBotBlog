@@ -1,5 +1,6 @@
 Django
 django-markdownify
+django-cleanup
 Pillow
 python-telegram-bot
 requests

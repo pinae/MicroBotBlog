@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'microblog.apps.MicroblogConfig',
     'markdownify.apps.MarkdownifyConfig',
     'telegramBot.apps.TelegrambotConfig',
+    'django_cleanup.apps.CleanupConfig'
 ]
 
 MIDDLEWARE = [
