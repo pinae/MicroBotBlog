@@ -4,6 +4,7 @@ from django.urls import reverse
 from telegram import Bot
 from telegram.ext import Dispatcher
 from telegram.ext import MessageHandler, Filters
+from telegram.utils.request import Request
 from telegram.error import RetryAfter
 from queue import Queue
 from .bot import message, image
@@ -18,7 +19,7 @@ class TelegrambotConfig(AppConfig):
 
     def ready(self):
         if not self.bot:
-            self.bot = Bot(settings.TELEGRAM_BOT["token"])
+            self.bot = Bot(settings.TELEGRAM_BOT["token"], request=Request(read_timeout=10, connect_timeout=10))
         if not self.dispatcher:
             self.dispatcher = Dispatcher(bot=self.bot, update_queue=Queue(), use_context=True)
             self.dispatcher.add_handler(
