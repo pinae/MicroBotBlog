@@ -83,6 +83,10 @@ def image(update: UpdateWithToken, context: CallbackContext):
 
 
 def error_handler(update: UpdateWithToken, context: CallbackContext):
+    print(type(context.error))
+    print(context.error)
     if type(context.error) is SSLError or type(context.error) is NetworkError:
+        print("Sleeping for 2,5s.")
         sleep(2.5)
+        print("Trying to process the update again.")
         context.dispatcher.process_update(update)
