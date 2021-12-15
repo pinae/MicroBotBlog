@@ -6,6 +6,7 @@ from requests import post
 from ssl import SSLError
 from time import sleep
 from telegram.error import NetworkError
+from codecs import decode
 
 
 class UpdateWithToken(Update):
@@ -19,6 +20,14 @@ def get_telegram_id(update: UpdateWithToken):
     if update.edited_message is not None:
         telegram_id = update.edited_message.message_id
     return telegram_id
+
+
+def add_media_group_id(update: UpdateWithToken, data: dict):
+    if update.message is not None and update.message.media_group_id is not None:
+        data["media_group_id"] = update.message.media_group_id
+    if update.edited_message is not None and update.edited_message.media_group_id is not None:
+        data["media_group_id"] = update.edited_message.media_group_id
+    return data
 
 
 def request_save(view_name, data, csrf_token, try_no=1):
@@ -47,8 +56,10 @@ def message(update: UpdateWithToken, context: CallbackContext):
             "last_name": update.effective_user["last_name"]
         },
         "project_name": update.effective_chat["title"],
-        "text": update.effective_message.text_markdown,
-        "telegram_id": telegram_id
+        "text": decode(update.effective_message.text_markdown.encode('utf-8'), encoding="unicode_escape")
+        if update.effective_message.text_markdown is not None else None,
+        "telegram_id": telegram_id,
+        "is_edit": update.edited_message is not None
     }, csrf_token=update.csrf_token)
 
 
@@ -71,13 +82,17 @@ def image(update: UpdateWithToken, context: CallbackContext):
                 print("Tried 10 times to load the file object. Always getting an SSLError. Giving up.")
                 return
     telegram_id = get_telegram_id(update)
-    request_save(view_name="download_image", data={
+    data = {
         "author_info": {
             "first_name": update.effective_user["first_name"],
             "last_name": update.effective_user["last_name"]
         },
         "project_name": update.effective_chat["title"],
-        "caption": update.effective_message.caption_markdown,
+        "caption": decode(update.effective_message.caption_markdown.encode('utf-8'), encoding="unicode_escape")
+        if update.effective_message.caption_markdown is not None else None,
         "album": [file_object['file_path']],
-        "telegram_id": telegram_id
-    }, csrf_token=update.csrf_token)
+        "telegram_id": telegram_id,
+        "is_edit": update.edited_message is not None
+    }
+    add_media_group_id(update, data)
+    request_save(view_name="download_image", data=data, csrf_token=update.csrf_token)

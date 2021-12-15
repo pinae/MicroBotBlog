@@ -80,12 +80,25 @@ def get_or_make_post(data, project, author):
     telegram_id = None
     if "telegram_id" in data:
         telegram_id = data["telegram_id"]
-        try:
-            post = BlogPost.objects.get(project=project, author=author, telegram_id=telegram_id)
-        except BlogPost.DoesNotExist:
-            post = BlogPost(project=project, author=author, telegram_id=telegram_id)
+        if "media_group_id" in data:
+            try:
+                post = BlogPost.objects.get(project=project, author=author,
+                                            telegram_media_group_id=data["media_group_id"])
+            except BlogPost.DoesNotExist:
+                try:
+                    post = BlogPost.objects.get(project=project, author=author,
+                                                telegram_id=telegram_id)
+                except BlogPost.DoesNotExist:
+                    post = BlogPost(project=project, author=author, text="", telegram_id=telegram_id)
+        else:
+            try:
+                post = BlogPost.objects.get(project=project, author=author,
+                                            telegram_id=telegram_id)
+            except BlogPost.DoesNotExist:
+                post = BlogPost(project=project, author=author, text="", telegram_id=telegram_id)
     else:
-        post = BlogPost(project=project, author=author, telegram_id=telegram_id)
+        post = BlogPost(project=project, author=author, text="", telegram_id=telegram_id)
+    post.telegram_media_group_id = data["media_group_id"] if "media_group_id" in data else None
     return post
 
 
@@ -119,15 +132,14 @@ def download_image(request):
     except BadRequestException as e:
         return HttpResponseBadRequest(str(e))
     post = get_or_make_post(data, project, author=user)
-    existing_images = BlogImage.objects.filter(post=post)
-    for existing_image in existing_images:
-        existing_image.delete()
+    if "is_edit" in data and data["is_edit"]:
+        existing_images = BlogImage.objects.filter(post=post)
+        for existing_image in existing_images:
+            existing_image.delete()
     if "caption" not in data:
         return HttpResponseBadRequest("Error: \"caption\" is missing.")
     if data["caption"] is not None:
         post.text = data["caption"]
-    else:
-        post.text = ""
     post.save()
     for i, image_url in enumerate(data['album']):
         with NamedTemporaryFile() as tmp_file:
@@ -140,7 +152,7 @@ def download_image(request):
             blog_image = BlogImage(image=file_obj, post=post)
             blog_image.save()
             post.text = "![{}{}]({}{})\n\n{}".format(
-                data["caption"],
+                data["caption"] if data["caption"] is not None else "",
                 " - Image No. " + str(i) if len(data['album']) > 1 else "",
                 settings.DOMAIN,
                 blog_image.image.url,
