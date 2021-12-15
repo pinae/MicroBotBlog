@@ -30,22 +30,15 @@ def add_media_group_id(update: UpdateWithToken, data: dict):
     return data
 
 
-def request_save(view_name, data, csrf_token, try_no=1):
-    try:
-        response = post(settings.DOMAIN + reverse(view_name), headers={
-            "Connection": "Keep-Alive",
-            "X-CSRFToken": csrf_token
-        }, cookies={
-            "csrftoken": csrf_token
-        }, json=data)
-        if response.text != "OK":
-            print(response.text)
-    except SSLError or NetworkError:
-        if try_no <= 10:
-            sleep(1.5)
-            request_save(view_name, data, csrf_token, try_no=try_no+1)
-        else:
-            print("Tried 10 times. Always getting an SSLError. Giving up.")
+def request_save(view_name, data, csrf_token):
+    response = post(settings.DOMAIN + reverse(view_name), headers={
+        "Connection": "Keep-Alive",
+        "X-CSRFToken": csrf_token
+    }, cookies={
+        "csrftoken": csrf_token
+    }, json=data)
+    if response.text != "OK":
+        print(response.text)
 
 
 def message(update: UpdateWithToken, context: CallbackContext):
@@ -64,7 +57,6 @@ def message(update: UpdateWithToken, context: CallbackContext):
 
 
 def image(update: UpdateWithToken, context: CallbackContext):
-    print(update.effective_message.caption_markdown)
     biggest_photo = {'object': None, 'height': 0}
     for photo_size in update.effective_message.photo:
         if photo_size.height > biggest_photo['height']:
@@ -72,15 +64,7 @@ def image(update: UpdateWithToken, context: CallbackContext):
             biggest_photo['object'] = photo_size
     if biggest_photo['object'] is None:
         return
-    for try_no in range(10):
-        try:
-            file_object = context.bot.get_file(biggest_photo['object'])
-            break
-        except SSLError or NetworkError:
-            sleep(1.5)
-            if try_no >= 9:
-                print("Tried 10 times to load the file object. Always getting an SSLError. Giving up.")
-                return
+    file_object = context.bot.get_file(biggest_photo['object'])
     telegram_id = get_telegram_id(update)
     data = {
         "author_info": {
@@ -96,3 +80,9 @@ def image(update: UpdateWithToken, context: CallbackContext):
     }
     add_media_group_id(update, data)
     request_save(view_name="download_image", data=data, csrf_token=update.csrf_token)
+
+
+def error_handler(update: UpdateWithToken, context: CallbackContext):
+    if type(context.error) is SSLError or type(context.error) is NetworkError:
+        sleep(2.5)
+        context.dispatcher.process_update(update)
