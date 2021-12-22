@@ -49,8 +49,7 @@ def message(update: UpdateWithToken, context: CallbackContext):
             "last_name": update.effective_user["last_name"]
         },
         "project_name": update.effective_chat["title"],
-        "text": decode(update.effective_message.text_markdown.encode('utf-8'), encoding="unicode_escape")
-        if update.effective_message.text_markdown is not None else None,
+        "text": update.effective_message.text_markdown,
         "telegram_id": telegram_id,
         "is_edit": update.edited_message is not None
     }, csrf_token=update.csrf_token)
