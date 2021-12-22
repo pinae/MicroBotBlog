@@ -20,8 +20,8 @@ class BlogPost(models.Model):
                                related_name='posts')
     date = models.DateTimeField(default=timezone.now)
     text = models.TextField()
-    telegram_id = models.IntegerField(null=True, default=None)
-    telegram_media_group_id = models.BigIntegerField(null=True, default=None)
+    telegram_id = models.IntegerField(null=True, blank=True, default=None)
+    telegram_media_group_id = models.BigIntegerField(null=True, blank=True, default=None)
 
     def __str__(self):
         return "{}: {}...".format(self.project.name, self.text[:100])
