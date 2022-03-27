@@ -27,7 +27,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-kpp%ga$)gsiu^(kyx_4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG_MODE', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv('DOMAIN_WITHOUT_PROTOCOL', '127.0.0.1:8000')]
 
 
 # Application definition
