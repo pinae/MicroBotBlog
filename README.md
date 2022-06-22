@@ -18,7 +18,8 @@ time. Activate the virtualenv on Unix-style systems with
 `source env/bin/activate`.
 
 After activating the virtualenv navigate to the folder 
-`projectBlog`. Start the development server with 
+`projectBlog`. The dependencies are installed conveniently with 
+`pip install -r requirements.txt`. Start the development server with 
 `python manage.py runserver`.
 
 The web-application is accessible via 
