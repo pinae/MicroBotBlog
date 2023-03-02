@@ -8,8 +8,9 @@ from json import loads, decoder
 
 @csrf_exempt
 def webhook(request):
-    dispatcher = apps.get_app_config('telegramBot').dispatcher
-    bot = apps.get_app_config('telegramBot').bot
+    application = apps.get_app_config('telegramBot').application
+    #dispatcher = apps.get_app_config('telegramBot').dispatcher
+    #bot = apps.get_app_config('telegramBot').bot
     try:
         update_data = loads(request.body)
         print("Webhook request data:")
@@ -21,7 +22,7 @@ def webhook(request):
             and "from" in update_data["message"]
             and "is_bot" not in update_data["message"]["from"]):
         update_data["message"]["from"]["is_bot"] = False
-    telegram_update = UpdateWithToken.de_json(data=update_data, bot=bot)
+    telegram_update = UpdateWithToken.de_json(data=update_data, bot=application.bot)
     telegram_update.csrf_token = get_token(request)
-    dispatcher.process_update(telegram_update)
+    application.process_update(telegram_update)
     return HttpResponse("OK")

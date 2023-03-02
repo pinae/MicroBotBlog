@@ -41,7 +41,7 @@ def request_save(view_name, data, csrf_token):
         print(response.text)
 
 
-def message(update: UpdateWithToken, context: CallbackContext):
+async def message(update: UpdateWithToken, context: CallbackContext):
     telegram_id = get_telegram_id(update)
     request_save(view_name="create_post", data={
         "author_info": {
@@ -55,7 +55,7 @@ def message(update: UpdateWithToken, context: CallbackContext):
     }, csrf_token=update.csrf_token)
 
 
-def image(update: UpdateWithToken, context: CallbackContext):
+async def image(update: UpdateWithToken, context: CallbackContext):
     biggest_photo = {'object': None, 'height': 0}
     for photo_size in update.effective_message.photo:
         if photo_size.height > biggest_photo['height']:
@@ -81,11 +81,11 @@ def image(update: UpdateWithToken, context: CallbackContext):
     request_save(view_name="download_image", data=data, csrf_token=update.csrf_token)
 
 
-def error_handler(update: UpdateWithToken, context: CallbackContext):
+async def error_handler(update: UpdateWithToken, context: CallbackContext):
     print(type(context.error))
     print(context.error)
     if type(context.error) is SSLError or type(context.error) is NetworkError:
         print("Sleeping for 2,5s.")
         sleep(2.5)
         print("Trying to process the update again.")
-        context.dispatcher.process_update(update)
+        await context.application.process_update(update)
