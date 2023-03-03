@@ -7,7 +7,7 @@ from json import loads, decoder
 
 
 @csrf_exempt
-def webhook(request):
+async def webhook(request):
     application = apps.get_app_config('telegramBot').application
     #dispatcher = apps.get_app_config('telegramBot').dispatcher
     #bot = apps.get_app_config('telegramBot').bot
