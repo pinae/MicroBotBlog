@@ -4,10 +4,11 @@ from django.http import HttpResponse
 from django.apps import apps
 from telegram import Update
 from json import loads, decoder
+import asyncio
 
 
 @csrf_exempt
-async def webhook(request):
+def webhook(request):
     application = apps.get_app_config('telegramBot').application
     #dispatcher = apps.get_app_config('telegramBot').dispatcher
     #bot = apps.get_app_config('telegramBot').bot
@@ -25,5 +26,5 @@ async def webhook(request):
     telegram_update = Update.de_json(data=update_data, bot=application.bot)
     application.bot_data['csrf_token'] = get_token(request)
     #telegram_update.csrf_token = get_token(request)
-    await application.process_update(telegram_update)
+    asyncio.run(application.process_update(telegram_update))
     return HttpResponse("OK")
