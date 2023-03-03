@@ -8,6 +8,7 @@ from telegram.ext import MessageHandler, filters
 from telegram.error import RetryAfter
 #from queue import Queue
 from .bot import message, image, error_handler
+import asyncio
 
 
 class TelegrambotConfig(AppConfig):
@@ -31,7 +32,7 @@ class TelegrambotConfig(AppConfig):
                 MessageHandler(filters=filters.PHOTO, callback=image))
         if settings.TELEGRAM_BOT["register_webhook"] and not self.webhook_registered:
             try:
-                self.application.bot.setWebhook(settings.DOMAIN + reverse('webhook'))
+                asyncio.run(self.application.bot.setWebhook(settings.DOMAIN + reverse('webhook')))
             except RetryAfter:
                 print("Telegram didn't accept the setWebhook command. " +
                       "This is probably because there was another request to the API within one second.")
