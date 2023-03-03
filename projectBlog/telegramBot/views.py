@@ -9,9 +9,12 @@ import asyncio
 
 @csrf_exempt
 def webhook(request):
-    application = apps.get_app_config('telegramBot').application
-    #dispatcher = apps.get_app_config('telegramBot').dispatcher
-    #bot = apps.get_app_config('telegramBot').bot
+    async def pass_to_telegram_bot_application(update_json, csrf_token):
+        application = apps.get_app_config('telegramBot').application
+        telegram_update = Update.de_json(data=update_json, bot=application.bot)
+        application.bot_data['csrf_token'] = csrf_token
+        await application.process_update(telegram_update)
+
     try:
         update_data = loads(request.body)
         print("Webhook request data:")
@@ -23,8 +26,5 @@ def webhook(request):
             and "from" in update_data["message"]
             and "is_bot" not in update_data["message"]["from"]):
         update_data["message"]["from"]["is_bot"] = False
-    telegram_update = Update.de_json(data=update_data, bot=application.bot)
-    application.bot_data['csrf_token'] = get_token(request)
-    #telegram_update.csrf_token = get_token(request)
-    asyncio.run(application.process_update(telegram_update))
+    asyncio.run(pass_to_telegram_bot_application(update_data, get_token(request)))
     return HttpResponse("OK")
