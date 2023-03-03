@@ -51,7 +51,7 @@ async def message(update: Update, context: CallbackContext):
     }, csrf_token=context.bot_data['csrf_token'])
 
 
-async def image(update: UpdateWithToken, context: CallbackContext):
+async def image(update: Update, context: CallbackContext):
     biggest_photo = {'object': None, 'height': 0}
     for photo_size in update.effective_message.photo:
         if photo_size.height > biggest_photo['height']:
