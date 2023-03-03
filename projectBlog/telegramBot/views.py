@@ -25,5 +25,5 @@ def webhook(request):
     telegram_update = Update.de_json(data=update_data, bot=application.bot)
     application.bot_data['csrf_token'] = get_token(request)
     #telegram_update.csrf_token = get_token(request)
-    application.process_update(telegram_update)
+    await application.process_update(telegram_update)
     return HttpResponse("OK")
