@@ -13,7 +13,7 @@ RUN apt-get update && \
 	pip3 install uwsgi mysqlclient && \
     rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /home/docker/requirements.txt
-COPY projectBlog /var/www/
+COPY projectBlog /var/www/code/
 COPY docker-setup/uwsgi-app.ini /etc/uwsgi/apps-enabled/uwsgi-app.ini
 COPY docker-setup/init_and_run.sh /home/docker/init_and_run.sh
 WORKDIR /home/docker/
