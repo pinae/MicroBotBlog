@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 from django.http import HttpResponse
 from django.apps import apps
-from .bot import UpdateWithToken
+from telegram import Update
 from json import loads, decoder
 
 
@@ -22,7 +22,8 @@ def webhook(request):
             and "from" in update_data["message"]
             and "is_bot" not in update_data["message"]["from"]):
         update_data["message"]["from"]["is_bot"] = False
-    telegram_update = UpdateWithToken.de_json(data=update_data, bot=application.bot)
-    telegram_update.csrf_token = get_token(request)
+    telegram_update = Update.de_json(data=update_data, bot=application.bot)
+    application.bot_data['csrf_token'] = get_token(request)
+    #telegram_update.csrf_token = get_token(request)
     application.process_update(telegram_update)
     return HttpResponse("OK")
